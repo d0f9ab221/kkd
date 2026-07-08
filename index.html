@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- Firebase SDK -->
+  <script type="module" src="firebase-config.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SnapTube - YouTube Thumbnail Downloader</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📸</text></svg>">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Header -->
+        <header>
+            <div class="logo">
+                <i class="fa-brands fa-youtube logo-icon"></i>
+                <h1>Snap<span>Tube</span></h1>
+            </div>
+            <p class="subtitle">Download high-quality YouTube video thumbnails instantly</p>
+        </header>
+
+        <!-- Main Input Section -->
+        <main class="main-content">
+            <div class="search-box-container">
+                <form id="downloader-form" class="search-form">
+                    <div class="input-wrapper">
+                        <i class="fa-solid fa-link input-icon"></i>
+                        <input 
+                            type="text" 
+                            id="youtube-url" 
+                            placeholder="Paste YouTube video link here (e.g., https://www.youtube.com/watch?v=dQw4w9WgXcQ)" 
+                            required
+                            autocomplete="off"
+                        >
+                        <button type="button" id="clear-btn" class="clear-btn hidden">
+                            <i class="fa-solid fa-xmark"></i>
+                        </button>
+                    </div>
+                    <button type="submit" class="btn-primary">
+                        <span>Get Thumbnails</span>
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </button>
+                </form>
+                <div id="error-message" class="error-message hidden">
+                    <i class="fa-solid fa-circle-exclamation"></i>
+                    <span id="error-text">Invalid YouTube URL. Please check and try again.</span>
+                </div>
+            </div>
+
+            <!-- Quick Demo Links -->
+            <div class="demo-links">
+                <span>Or try these:</span>
+                <button class="demo-btn" data-url="https://www.youtube.com/watch?v=dQw4w9WgXcQ">Rick Astley</button>
+                <button class="demo-btn" data-url="https://www.youtube.com/watch?v=L_LUpnjgPso">Lofi Girl</button>
+                <button class="demo-btn" data-url="https://www.youtube.com/watch?v=y6120QYoD94">Sandstorm</button>
+            </div>
+
+            <!-- Results Section (Hidden by default) -->
+            <section id="results-section" class="results-section hidden">
+                <div class="video-meta">
+                    <h2 id="video-title-placeholder"><i class="fa-solid fa-video"></i> YouTube Video Thumbnail</h2>
+                </div>
+
+                <div class="results-grid">
+                    <!-- Left: Preview -->
+                    <div class="preview-card">
+                        <div class="preview-header">
+                            <span class="badge">Live Preview</span>
+                            <span id="current-resolution-badge" class="resolution-badge">1080p (HD)</span>
+                        </div>
+                        <div class="image-container">
+                            <img id="main-preview-img" src="" alt="Thumbnail Preview">
+                            <div class="img-overlay">
+                                <button id="zoom-btn" class="overlay-btn" title="View Fullscreen">
+                                    <i class="fa-solid fa-expand"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right: Download Options -->
+                    <div class="options-card">
+                        <h3>Select Resolution</h3>
+                        <div class="resolution-list">
+                            <!-- Max Resolution (1080p) -->
+                            <div class="resolution-item active" data-quality="maxresdefault" data-res="1080p (HD)">
+                                <div class="res-info">
+                                    <span class="res-name">Maximum Quality (HD)</span>
+                                    <span class="res-size">1920 x 1080</span>
+                                </div>
+                                <button class="download-single-btn" data-quality="maxresdefault">
+                                    <i class="fa-solid fa-download"></i>
+                                </button>
+                            </div>
+
+                            <!-- High Resolution (720p) -->
+                            <div class="resolution-item" data-quality="sddefault" data-res="720p (SD)">
+                                <div class="res-info">
+                                    <span class="res-name">Standard Quality (SD)</span>
+                                    <span class="res-size">640 x 480</span>
+                                </div>
+                                <button class="download-single-btn" data-quality="sddefault">
+                                    <i class="fa-solid fa-download"></i>
+                                </button>
+                            </div>
+
+                            <!-- Medium Resolution (480p) -->
+                            <div class="resolution-item" data-quality="hqdefault" data-res="Medium (HQ)">
+                                <div class="res-info">
+                                    <span class="res-name">Medium Quality</span>
+                                    <span class="res-size">480 x 360</span>
+                                </div>
+                                <button class="download-single-btn" data-quality="hqdefault">
+                                    <i class="fa-solid fa-download"></i>
+                                </button>
+                            </div>
+
+                            <!-- Standard Resolution (360p) -->
+                            <div class="resolution-item" data-quality="mqdefault" data-res="Normal">
+                                <div class="res-info">
+                                    <span class="res-name">Normal Quality</span>
+                                    <span class="res-size">320 x 180</span>
+                                </div>
+                                <button class="download-single-btn" data-quality="mqdefault">
+                                    <i class="fa-solid fa-download"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <button id="download-all-btn" class="btn-success">
+                            <i class="fa-solid fa-circle-down"></i>
+                            <span>Download Selected Quality</span>
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- History Section -->
+            <section id="history-section" class="history-section hidden">
+                <div class="section-header">
+                    <h3><i class="fa-solid fa-clock-rotate-left"></i> Recent Downloads</h3>
+                    <button id="clear-history-btn" class="btn-text-danger">Clear All</button>
+                </div>
+                <div id="history-grid" class="history-grid">
+                    <!-- History items injected here -->
+                </div>
+            </section>
+        </main>
+
+        <!-- Features Section -->
+        <section class="features-section">
+            <div class="feature-card">
+                <div class="feature-icon"><i class="fa-solid fa-bolt"></i></div>
+                <h3>Instant Fetch</h3>
+                <p>No waiting. Paste your link and get high-resolution thumbnails instantly.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon"><i class="fa-solid fa-wand-magic-sparkles"></i></div>
+                <h3>Multiple Sizes</h3>
+                <p>Download in HD (1080p), SD (720p), Medium, or Standard resolutions.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon"><i class="fa-solid fa-shield-halved"></i></div>
+                <h3>100% Safe & Free</h3>
+                <p>No registration, no limits, and direct downloads from YouTube servers.</p>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer>
+            <p>&copy; 2024 SnapTube. Built for creators. Direct thumbnail extraction tool.</p>
+        </footer>
+    </div>
+
+    <!-- Fullscreen Lightbox Modal -->
+    <div id="lightbox-modal" class="lightbox hidden">
+        <span class="close-lightbox">&times;</span>
+        <img class="lightbox-content" id="lightbox-img">
+        <div id="lightbox-caption"></div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
